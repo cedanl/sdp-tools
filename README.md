@@ -347,10 +347,17 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## Deployment
+
+For information on publishing to PyPI:
+- [Test PyPI Setup Guide](docs/deployment/testpypi-setup.md)
+- [Deployment Documentation](docs/deployment/)
+
 ## Support
 
 - Issues: https://github.com/cedanl/sdp-tools/issues
 - Documentation: https://github.com/cedanl/sdp-tools/tree/main/docs
+- Deployment: https://github.com/cedanl/sdp-tools/tree/main/docs/deployment
 
 ## Version
 
