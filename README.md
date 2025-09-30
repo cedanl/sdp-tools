@@ -349,9 +349,12 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Deployment
 
-For information on publishing to PyPI:
-- [Test PyPI Setup Guide](docs/deployment/testpypi-setup.md)
-- [Deployment Documentation](docs/deployment/)
+**Quick Start:** [5-Minute Trusted Publisher Setup](docs/deployment/trusted-publisher-quickstart.md) ⚡
+
+For complete information on publishing to PyPI:
+- [Trusted Publisher Quick Start](docs/deployment/trusted-publisher-quickstart.md) - Already uploaded? Start here!
+- [Complete Test PyPI Setup Guide](docs/deployment/testpypi-setup.md) - First time? Read this.
+- [Deployment Documentation](docs/deployment/) - Overview and troubleshooting
 
 ## Support
 

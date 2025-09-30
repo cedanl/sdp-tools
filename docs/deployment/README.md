@@ -4,17 +4,30 @@ Documentation for deploying and publishing sdp-tools.
 
 ## Files
 
-### `testpypi-setup.md`
+### `trusted-publisher-quickstart.md` ⚡
+
+**5-minute quick start** for configuring trusted publishing after you've already uploaded to Test PyPI once.
+
+**Start here if:**
+- ✅ You've already uploaded to Test PyPI
+- ✅ You just want to enable automatic publishing
+- ✅ You want the fastest path to get it working
+
+### `testpypi-setup.md` 📚
 
 Complete guide for setting up automated publishing to Test PyPI using GitHub Actions and trusted publishing.
 
 **Covers:**
 - Creating Test PyPI account
+- First-time manual upload
 - Configuring trusted publisher
 - Setting up GitHub environments
 - Troubleshooting common issues
 
-**Start here if:** You want to enable automatic publishing of development versions to Test PyPI on every push to main.
+**Start here if:**
+- ❌ You've never uploaded to Test PyPI
+- ❌ You need detailed explanations
+- ❌ You're new to PyPI publishing
 
 ## Quick Links
 

@@ -7,7 +7,22 @@ echo "🚀 Setting up Test PyPI Publishing"
 echo "=================================="
 echo ""
 
-# Check if user is logged in
+# Check if version already exists
+echo "Step 0: Checking for existing uploads..."
+CURRENT_VERSION=$(python -c "import toml; print(toml.load(open('pyproject.toml'))['project']['version'])")
+echo "Current version: $CURRENT_VERSION"
+echo ""
+echo "⚠️  NOTE: If this version already exists on Test PyPI, this will fail."
+echo "   The automated workflow uses .devN versions to avoid conflicts."
+echo ""
+read -p "Continue anyway? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted. Use the GitHub Actions workflow for automatic publishing."
+    exit 1
+fi
+
+echo ""
 echo "Step 1: Building package..."
 uv build
 
