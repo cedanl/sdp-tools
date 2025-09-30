@@ -2079,7 +2079,7 @@ wheels = [
 
 [[package]]
 name = "sdp-tools"
-version = "2025.1.6"
+version = "2025.1.7"
 source = { editable = "." }
 dependencies = [
     { name = "minio" },

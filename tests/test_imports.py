@@ -19,8 +19,19 @@ class TestImports:
         """Test package version is available."""
         import minio_file
 
+        # Read expected version from pyproject.toml
+        import tomllib
+        from pathlib import Path
+
+        project_root = Path(__file__).parent.parent
+        pyproject_path = project_root / "pyproject.toml"
+
+        with open(pyproject_path, "rb") as f:
+            pyproject = tomllib.load(f)
+        expected_version = pyproject["project"]["version"]
+
         assert hasattr(minio_file, '__version__')
-        assert minio_file.__version__ == "2025.1.6"
+        assert minio_file.__version__ == expected_version
 
     def test_main_module_import(self):
         """Test main minio_file module imports successfully."""

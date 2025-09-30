@@ -52,7 +52,16 @@ class TestPackageBuilding:
 
     def test_built_package_structure(self):
         """Test built package has correct structure."""
+        # Read expected version from pyproject.toml
+        import tomllib
+
         project_root = Path(__file__).parent.parent
+        pyproject_path = project_root / "pyproject.toml"
+
+        with open(pyproject_path, "rb") as f:
+            pyproject = tomllib.load(f)
+        expected_version = pyproject["project"]["version"]
+
         dist_dir = project_root / "dist"
 
         if not dist_dir.exists():
@@ -65,7 +74,7 @@ class TestPackageBuilding:
         # We could unzip and check contents here if needed
         wheel_file = wheel_files[0]
         assert wheel_file.name.startswith("sdp_tools-"), "Wheel file has wrong name"
-        assert "2025.1.6" in wheel_file.name, "Version not in wheel name"
+        assert expected_version in wheel_file.name, f"Version {expected_version} not in wheel name"
 
 
 class TestInstallationFromBuilds:
