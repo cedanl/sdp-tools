@@ -115,3 +115,16 @@ site/
 
 # Test virtual environments created by CI/CD
 test-install/
+
+# Development/scratch test files in root
+test_*.py
+
+# Node.js (not needed for Python project)
+node_modules/
+package.json
+package-lock.json
+
+# Environment files with credentials
+env.txt
+.env.local
+.env.*.local
