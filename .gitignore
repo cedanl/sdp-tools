@@ -112,3 +112,6 @@ ENV/
 
 # mkdocs build dir
 site/
+
+# Test virtual environments created by CI/CD
+test-install/

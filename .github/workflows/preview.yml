@@ -45,12 +45,18 @@ jobs:
       
       - name: Run tests
         run: |
-          # Coverage includes surfdrive if it exists
-          if [ -d "src/surfdrive" ]; then
-            uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov=surfdrive --cov-report=term-missing
-          else
-            uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov-report=term-missing
-          fi
+          # Coverage includes surfdrive if it exists (cross-platform Python check)
+          uv run python -c "
+          import os
+          import subprocess
+          import sys
+          cov_args = ['--cov=minio_file']
+          if os.path.exists('src/surfdrive'):
+              cov_args.append('--cov=surfdrive')
+          cmd = ['uv', 'run', 'pytest', 'tests/', '-v', '-m', 'not slow'] + cov_args + ['--cov-report=term-missing']
+          result = subprocess.run(cmd)
+          sys.exit(result.returncode)
+          "
       
       - name: Create development version
         run: |
