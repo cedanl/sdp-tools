@@ -45,7 +45,7 @@ jobs:
       
       - name: Run tests
         run: |
-          uv run pytest tests/ -v -m "not slow" --cov=sdp_tools --cov-report=term-missing
+          uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov=surfdrive --cov-report=term-missing
       
       - name: Create development version
         run: |
@@ -60,17 +60,24 @@ jobs:
           echo "Current version: $CURRENT_VERSION"
           echo "Development version: $DEV_VERSION"
           
-          # Update version in __init__.py using Python
+          # Update version in __init__.py files using Python
           uv run python -c "
           import re
-          with open('src/sdp_tools/__init__.py', 'r') as f:
+          # Update minio_file version
+          with open('src/minio_file/__init__.py', 'r') as f:
               content = f.read()
           content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
-          with open('src/sdp_tools/__init__.py', 'w') as f:
+          with open('src/minio_file/__init__.py', 'w') as f:
               f.write(content)
-          print('Updated __init__.py version')
+          # Update surfdrive version
+          with open('src/surfdrive/__init__.py', 'r') as f:
+              content = f.read()
+          content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
+          with open('src/surfdrive/__init__.py', 'w') as f:
+              f.write(content)
+          print('Updated __init__.py versions')
           "
-          
+
           # Update version in pyproject.toml using Python
           uv run python -c "
           import toml
@@ -81,12 +88,13 @@ jobs:
               toml.dump(data, f)
           print('Updated pyproject.toml version')
           "
-          
+
           echo "Updated to version: $DEV_VERSION"
-          
+
           # Verify the changes
           echo "Checking updated files:"
-          grep "__version__" src/sdp_tools/__init__.py
+          grep "__version__" src/minio_file/__init__.py
+          grep "__version__" src/surfdrive/__init__.py
           grep "version =" pyproject.toml | head -1
       
       - name: Build wheels and source tarball

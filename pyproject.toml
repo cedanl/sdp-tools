@@ -125,7 +125,7 @@ markers = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src/sdp_tools"]
+source = ["src/minio_file", "src/surfdrive"]
 omit = [
     "*/tests/*",
     "*/test_*.py",
@@ -161,7 +161,10 @@ message = "Version updated from {current_version} to {new_version}"
 values = ["release", "post"]
 
 [[tool.bumpversion.files]]
-filename = "src/sdp_tools/__init__.py"
+filename = "src/minio_file/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "src/surfdrive/__init__.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
