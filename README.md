@@ -1,171 +1,359 @@
-# MinIO Uploader
+# SDP Tools
 
-A Python tool to upload files to MinIO using credentials from environment variables.
+A Python toolkit for Scientific Data Platform operations, providing utilities for MinIO object storage and SURFdrive file transfers.
 
 ## Features
 
-- 🔐 Configuration via environment variables
-- 📁 Upload single files or entire directories
-- 🪣 Automatic bucket creation
+### MinIO File Management
+- 🔐 Multi-account configuration support (WO, HO, ML, VIZ)
+- 📁 Upload and download files
+- 🪣 Bucket management and listing
 - 🔍 List and verify uploaded objects
-- ⚡ Built with modern Python tooling (uv)
-- 🛠️ Download files from MinIO
+- ⚡ Environment-based credential management
+
+### SURFdrive Integration
+- 📥 Download CSV files from SURFdrive public shares
+- 🔒 HTTP Basic Authentication support
+- 📊 Direct pandas DataFrame integration
+- 🌐 WebDAV protocol support
+
+## Installation
+
+### From PyPI (coming soon)
+```bash
+pip install sdp-tools
+```
+
+### From source
+```bash
+# Clone the repository
+git clone https://github.com/cedanl/sdp-tools
+cd sdp-tools
+
+# Install with uv (recommended)
+uv pip install -e ".[dev,test]"
+
+# Or with pip
+pip install -e ".[dev,test]"
+```
 
 ## Quick Start
 
-### Prerequisites
+### MinIO File Operations
 
-- [uv](https://docs.astral.sh/uv/) installed
-- MinIO server with valid credentials
+The MinIO module supports multiple accounts through environment variable naming patterns.
 
-### Installation
+#### Configuration
+
+Set environment variables for your account (replace `{ACCOUNT}` with WO, HO, ML, or VIZ):
 
 ```bash
-# Clone/download the project
-git clone <your-repo> minio-uploader
-cd minio-uploader
-
-# Install with uv
-uv sync
-
-# Or install in development mode
-uv sync --dev
+export MINIO_HO_ACCESS_KEY="your-access-key"
+export MINIO_HO_SECRET_KEY="your-secret-key"
+export MINIO_HO_ENDPOINT="https://minio.example.com"
+export MINIO_HO_BUCKET="your-bucket-name"
 ```
 
-### Configuration
+#### Usage
 
-Set the required environment variables:
+```python
+from minio_file import minio_file
 
-```bash
-export MINIO_ACCESS_KEY="your-access-key"
-export MINIO_SECRET_KEY="your-secret-key"
-export MINIO_ENDPOINT="https://minio.example.com"
-export MINIO_BUCKET="your-bucket-name"  # Optional, defaults to "instroom-ml"
+# Initialize client for specific account
+ho = minio_file("HO")
+
+# Upload a file
+ho.upload_file("local_file.txt", "remote/path/file.txt")
+
+# Download a file
+ho.download_file("local_download.txt", "remote/path/file.txt")
+
+# List all files in bucket
+ho.get_file_list()
+
+# Get all available buckets
+buckets = ho.get_buckets()
+for bucket in buckets:
+    print(bucket.name)
 ```
 
-Or create a `.env` file:
+### SURFdrive File Downloads
+
+Download CSV files from SURFdrive public shares directly into pandas DataFrames.
+
+#### Configuration
 
 ```bash
-# .env file
-MINIO_ACCESS_KEY=your-access-key
-MINIO_SECRET_KEY=your-secret-key
-MINIO_ENDPOINT=https://minio.example.com
-MINIO_BUCKET=your-bucket-name
+export SURFDRIVE_SHARE_TOKEN="your-share-token"
+export SURFDRIVE_PASSWORD="your-password"
 ```
 
-### Usage
+#### Usage
+
+```python
+from surfdrive import download_surfdrive_csv
+
+# Download CSV and get DataFrame
+df = download_surfdrive_csv("data.csv")
+
+if df is not None:
+    print(f"Downloaded {len(df)} rows")
+    print(df.head())
+
+    # Save locally if needed
+    df.to_csv("local_copy.csv", index=False)
+```
+
+Or use the CLI:
 
 ```bash
-# Upload a single file
-uv run minio-upload /path/to/file.txt
+# Set environment variables first
+export SURFDRIVE_SHARE_TOKEN="your-token"
+export SURFDRIVE_PASSWORD="your-password"
 
-# Upload a directory
-uv run minio-upload /path/to/directory
-
-# Run with test data (creates and uploads test files)
-uv run minio-upload
-
-# Or run the module directly
-uv run python -m minio_uploader /path/to/file.txt
-
-# Get help
-uv run minio-upload --help
+# Download and save CSV
+python -m surfdrive.surfdrive_download output.csv
 ```
 
 ## Environment Variables
 
-| Variable | Required | Description | Default |
-|----------|----------|-------------|---------|
-| `MINIO_ACCESS_KEY` | ✅ | MinIO access key | - |
-| `MINIO_SECRET_KEY` | ✅ | MinIO secret key | - |
-| `MINIO_ENDPOINT` | ✅ | MinIO endpoint URL (e.g., `https://minio.example.com`) | - |
-| `MINIO_BUCKET` | ❌ | Target bucket name | `instroom-ml` |
+### MinIO Configuration
 
-## Examples
+Each account uses a prefix pattern: `MINIO_{ACCOUNT}_*`
 
-### Basic file upload
-```bash
-export MINIO_ACCESS_KEY="minioadmin"
-export MINIO_SECRET_KEY="minioadmin"
-export MINIO_ENDPOINT="http://localhost:9000"
+| Variable Pattern | Required | Description | Accounts |
+|----------|----------|-------------|----------|
+| `MINIO_{ACCOUNT}_ACCESS_KEY` | ✅ | MinIO access key | WO, HO, ML, VIZ |
+| `MINIO_{ACCOUNT}_SECRET_KEY` | ✅ | MinIO secret key | WO, HO, ML, VIZ |
+| `MINIO_{ACCOUNT}_ENDPOINT` | ✅ | MinIO endpoint URL | WO, HO, ML, VIZ |
+| `MINIO_{ACCOUNT}_BUCKET` | ✅ | Target bucket name | WO, HO, ML, VIZ |
 
-uv run minio-upload /path/to/document.pdf
-```
+**Example for HO account:**
+- `MINIO_HO_ACCESS_KEY`
+- `MINIO_HO_SECRET_KEY`
+- `MINIO_HO_ENDPOINT`
+- `MINIO_HO_BUCKET`
 
-### Using as a Python module
-```python
-from minio_uploader import MinIOUploader
+### SURFdrive Configuration
 
-uploader = MinIOUploader(bucket_name="my-bucket")
-uploader.get_credentials_from_environment()
-uploader.setup_minio_client()
-uploader.upload_file("/path/to/file.txt")
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SURFDRIVE_SHARE_TOKEN` | ✅ | Public share token from SURFdrive |
+| `SURFDRIVE_PASSWORD` | ✅ | Password for the public share |
 
 ## Development
 
+### Setup Development Environment
+
 ```bash
 # Install development dependencies
-uv sync --dev
+make install-dev
 
-# Run tests
-uv run pytest
+# Or manually
+uv pip install -e ".[dev,test]"
+```
 
+### Running Tests
+
+```bash
+# Run all fast tests
+make test-fast
+
+# Run all tests including slow ones
+make test
+
+# Run with coverage
+make test-coverage
+
+# Run specific test file
+pytest tests/test_surfdrive.py -v
+```
+
+### Code Quality
+
+```bash
 # Format code
-uv run black .
+make format
 
-# Lint code
-uv run ruff check .
+# Run linters
+make lint
 
-# Type check
-uv run mypy .
+# Run all checks (lint + tests)
+make check
+```
+
+### Building
+
+```bash
+# Build package
+make build
+
+# Build and verify
+make build-check
 ```
 
 ## Project Structure
 
 ```
-minio-uploader/
+sdp-tools/
+├── src/
+│   ├── minio_file/          # MinIO operations module
+│   │   ├── __init__.py
+│   │   └── minio_file.py
+│   └── surfdrive/           # SURFdrive operations module
+│       ├── __init__.py
+│       └── surfdrive_download.py
+├── tests/                   # Test suite
+│   ├── test_imports.py
+│   ├── test_functionality.py
+│   ├── test_surfdrive.py
+│   └── test_and_build_distribution.py
+├── docs/                    # Documentation
 ├── pyproject.toml          # Project configuration
-├── README.md              # This file
-├── minio_uploader.py      # Main module
-├── .env.example           # Example environment file
-└── tests/                 # Test files (optional)
+├── Makefile                # Development commands
+└── README.md               # This file
+```
+
+## API Reference
+
+### MinIO Module (`minio_file`)
+
+#### Class: `minio_file(account)`
+
+Initialize a MinIO client for a specific account.
+
+**Parameters:**
+- `account` (str): Account identifier. Must be one of: "WO", "HO", "ML", "VIZ"
+
+**Methods:**
+
+- `get_buckets()` → list: Retrieve all available buckets
+- `upload_file(file_name, full_name)`: Upload a file to MinIO
+  - `file_name`: Local file path
+  - `full_name`: Remote object path
+- `download_file(file_name, full_name)`: Download a file from MinIO
+  - `file_name`: Local destination path
+  - `full_name`: Remote object path
+- `get_file_list()`: Print all objects in the bucket
+
+**Example:**
+```python
+from minio_file import minio_file
+
+# Initialize for ML account
+ml = minio_file("ML")
+
+# Upload
+ml.upload_file("data.csv", "datasets/data.csv")
+
+# Download
+ml.download_file("local_data.csv", "datasets/data.csv")
+```
+
+### SURFdrive Module (`surfdrive`)
+
+#### Function: `download_surfdrive_csv(filename)`
+
+Download a CSV file from SURFdrive public share.
+
+**Parameters:**
+- `filename` (str): Name of the file to download (currently unused, downloads from configured share)
+
+**Returns:**
+- `pandas.DataFrame` or `None`: DataFrame with CSV data, or None if download fails
+
+**Environment Variables Required:**
+- `SURFDRIVE_SHARE_TOKEN`
+- `SURFDRIVE_PASSWORD`
+
+**Example:**
+```python
+from surfdrive import download_surfdrive_csv
+
+df = download_surfdrive_csv("data.csv")
+if df is not None:
+    print(f"Shape: {df.shape}")
+    print(df.describe())
 ```
 
 ## Troubleshooting
 
-### Missing environment variables
-```
-Missing required environment variables: MINIO_ACCESS_KEY, MINIO_SECRET_KEY
-```
-Solution: Set all required environment variables as shown in the configuration section.
+### MinIO Issues
 
-### Connection refused
+#### Invalid Account Error
 ```
-Failed to connect to MinIO: MaxRetryError(...)
+Incorrect account {account}
 ```
-Solution: Check if the `MINIO_ENDPOINT` is correct and accessible.
+**Solution:** Use only valid account names: "WO", "HO", "ML", or "VIZ"
 
-### SSL certificate verification failed
+#### Missing Environment Variables
 ```
-Failed to connect to MinIO: SSLError(...)
+Missing required environment variables
 ```
-Solution: If using self-signed certificates, the script automatically disables SSL warnings. For production, use valid SSL certificates.
+**Solution:** Set all required environment variables for your account (ACCESS_KEY, SECRET_KEY, ENDPOINT, BUCKET)
 
-### Access denied
+#### Connection Errors
 ```
-Failed to upload: AccessDenied
+Failed to connect to MinIO
 ```
-Solution: Verify that your `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` have the necessary permissions for the bucket.
+**Solution:**
+- Verify the `MINIO_{ACCOUNT}_ENDPOINT` is correct and accessible
+- Check network connectivity
+- Ensure MinIO server is running
 
-## Features
+### SURFdrive Issues
 
-- ✅ Upload single files
-- ✅ Upload entire directories (recursive)
-- ✅ Download files
-- ✅ List bucket contents
-- ✅ Automatic bucket creation
-- ✅ Environment variable configuration
-- ✅ Error handling and validation
-- ✅ Type hints
-- ✅ Modern Python packaging
+#### Authentication Errors (401)
+```
+Error: 401
+```
+**Solution:**
+- Verify `SURFDRIVE_SHARE_TOKEN` and `SURFDRIVE_PASSWORD` are correct
+- Check that the share is still active and accessible
+
+#### File Not Found (404)
+```
+Error: 404
+```
+**Solution:**
+- Verify the share URL is correct
+- Check that the file exists in the shared folder
+
+#### Network Timeout
+```
+Connection timeout
+```
+**Solution:**
+- Check internet connectivity
+- Verify SURFdrive service is accessible
+- Try again later if service is experiencing issues
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Run tests: `make test`
+5. Run linters: `make lint`
+6. Commit your changes: `git commit -m "Description"`
+7. Push to your fork: `git push origin feature-name`
+8. Create a Pull Request
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Support
+
+- Issues: https://github.com/cedanl/sdp-tools/issues
+- Documentation: https://github.com/cedanl/sdp-tools/tree/main/docs
+
+## Version
+
+Current version: 2025.1.6
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
