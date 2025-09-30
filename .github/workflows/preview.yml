@@ -45,7 +45,12 @@ jobs:
       
       - name: Run tests
         run: |
-          uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov=surfdrive --cov-report=term-missing
+          # Coverage includes surfdrive if it exists
+          if [ -d "src/surfdrive" ]; then
+            uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov=surfdrive --cov-report=term-missing
+          else
+            uv run pytest tests/ -v -m "not slow" --cov=minio_file --cov-report=term-missing
+          fi
       
       - name: Create development version
         run: |
@@ -63,18 +68,23 @@ jobs:
           # Update version in __init__.py files using Python
           uv run python -c "
           import re
+          import os
           # Update minio_file version
-          with open('src/minio_file/__init__.py', 'r') as f:
-              content = f.read()
-          content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
-          with open('src/minio_file/__init__.py', 'w') as f:
-              f.write(content)
-          # Update surfdrive version
-          with open('src/surfdrive/__init__.py', 'r') as f:
-              content = f.read()
-          content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
-          with open('src/surfdrive/__init__.py', 'w') as f:
-              f.write(content)
+          if os.path.exists('src/minio_file/__init__.py'):
+              with open('src/minio_file/__init__.py', 'r') as f:
+                  content = f.read()
+              content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
+              with open('src/minio_file/__init__.py', 'w') as f:
+                  f.write(content)
+              print('Updated minio_file version')
+          # Update surfdrive version if it exists
+          if os.path.exists('src/surfdrive/__init__.py'):
+              with open('src/surfdrive/__init__.py', 'r') as f:
+                  content = f.read()
+              content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
+              with open('src/surfdrive/__init__.py', 'w') as f:
+                  f.write(content)
+              print('Updated surfdrive version')
           print('Updated __init__.py versions')
           "
 
@@ -93,8 +103,12 @@ jobs:
 
           # Verify the changes
           echo "Checking updated files:"
-          grep "__version__" src/minio_file/__init__.py
-          grep "__version__" src/surfdrive/__init__.py
+          if [ -f src/minio_file/__init__.py ]; then
+              grep "__version__" src/minio_file/__init__.py
+          fi
+          if [ -f src/surfdrive/__init__.py ]; then
+              grep "__version__" src/surfdrive/__init__.py
+          fi
           grep "version =" pyproject.toml | head -1
       
       - name: Build wheels and source tarball
