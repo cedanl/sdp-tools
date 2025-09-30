@@ -1,0 +1,106 @@
+# This is a basic workflow to help you get started with Actions
+name: Stage & preview workflow
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [master, main]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  publish_dev_build:
+    runs-on: ubuntu-22.04
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/p/sdp-tools
+    strategy:
+      matrix:
+        python-versions: ["3.10"]
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for version bumping
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      
+      - name: Set up Python ${{ matrix.python-versions }}
+        run: uv python install ${{ matrix.python-versions }}
+      
+      - name: Create virtual environment
+        run: uv venv --python ${{ matrix.python-versions }}
+      
+      - name: Install dependencies
+        run: |
+          uv pip install -e ".[dev,test]"
+          uv pip install toml
+      
+      - name: Run tests
+        run: |
+          uv run pytest tests/ -v -m "not slow" --cov=sdp_tools --cov-report=term-missing
+      
+      - name: Create development version
+        run: |
+          # Use Python to read version from pyproject.toml without importing the package
+          CURRENT_VERSION=$(uv run python -c "
+          import toml
+          with open('pyproject.toml', 'r') as f:
+              data = toml.load(f)
+              print(data['project']['version'])
+          ")
+          DEV_VERSION="${CURRENT_VERSION}.dev${GITHUB_RUN_NUMBER}"
+          echo "Current version: $CURRENT_VERSION"
+          echo "Development version: $DEV_VERSION"
+          
+          # Update version in __init__.py using Python
+          uv run python -c "
+          import re
+          with open('src/sdp_tools/__init__.py', 'r') as f:
+              content = f.read()
+          content = re.sub(r'__version__ = \".*?\"', '__version__ = \"$DEV_VERSION\"', content)
+          with open('src/sdp_tools/__init__.py', 'w') as f:
+              f.write(content)
+          print('Updated __init__.py version')
+          "
+          
+          # Update version in pyproject.toml using Python
+          uv run python -c "
+          import toml
+          with open('pyproject.toml', 'r') as f:
+              data = toml.load(f)
+          data['project']['version'] = '$DEV_VERSION'
+          with open('pyproject.toml', 'w') as f:
+              toml.dump(data, f)
+          print('Updated pyproject.toml version')
+          "
+          
+          echo "Updated to version: $DEV_VERSION"
+          
+          # Verify the changes
+          echo "Checking updated files:"
+          grep "__version__" src/sdp_tools/__init__.py
+          grep "version =" pyproject.toml | head -1
+      
+      - name: Build wheels and source tarball
+        run: |
+          uv build
+      
+      - name: Show build artifacts
+        run: |
+          ls -la dist/
+          echo "Built packages:"
+          ls dist/
+        shell: bash
+
+      - name: Publish distribution to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
