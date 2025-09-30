@@ -1,8 +1,9 @@
-import requests
-import pandas as pd
-from requests.auth import HTTPBasicAuth
 from os import getenv
 from sys import argv
+
+import pandas as pd
+import requests
+from requests.auth import HTTPBasicAuth
 
 SURFDRIVE_WEBDAV = "https://surfdrive.surf.nl/files/public.php/webdav"
 
