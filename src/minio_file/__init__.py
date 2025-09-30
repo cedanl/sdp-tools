@@ -1,6 +1,6 @@
 """MinIO File management tool."""
 
-__version__ = "2025.1.6"
+__version__ = "2025.1.7"
 
 # Import main functions you want users to access
 from .minio_file import main, minio_file  # Import the class
