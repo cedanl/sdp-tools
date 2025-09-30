@@ -64,7 +64,7 @@ class TestPackageBuilding:
 
         # We could unzip and check contents here if needed
         wheel_file = wheel_files[0]
-        assert wheel_file.name.startswith("minio_file-"), "Wheel file has wrong name"
+        assert wheel_file.name.startswith("sdp_tools-"), "Wheel file has wrong name"
         assert "2025.1.6" in wheel_file.name, "Version not in wheel name"
 
 
