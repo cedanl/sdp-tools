@@ -20,8 +20,13 @@ class TestImports:
         import minio_file
 
         # Read expected version from pyproject.toml
-        import tomllib
+        import sys
         from pathlib import Path
+
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            import tomli as tomllib
 
         project_root = Path(__file__).parent.parent
         pyproject_path = project_root / "pyproject.toml"

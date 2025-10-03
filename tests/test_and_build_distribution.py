@@ -53,7 +53,12 @@ class TestPackageBuilding:
     def test_built_package_structure(self):
         """Test built package has correct structure."""
         # Read expected version from pyproject.toml
-        import tomllib
+        import sys
+
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            import tomli as tomllib
 
         project_root = Path(__file__).parent.parent
         pyproject_path = project_root / "pyproject.toml"
