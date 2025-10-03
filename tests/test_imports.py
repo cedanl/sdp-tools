@@ -17,11 +17,11 @@ class TestImports:
 
     def test_version_available(self):
         """Test package version is available."""
-        import minio_file
-
         # Read expected version from pyproject.toml
         import sys
         from pathlib import Path
+
+        import minio_file
 
         if sys.version_info >= (3, 11):
             import tomllib
