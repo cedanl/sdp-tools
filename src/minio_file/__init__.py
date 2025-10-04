@@ -2,9 +2,28 @@
 
 __version__ = "2025.1.7"
 
-# Import main functions you want users to access
-from .minio_file import main, minio_file  # Import the class
+# Legacy class-based API (for backward compatibility)
+# Functional API (recommended)
+from .minio_file import (
+    MinioConnection,
+    create_connection,
+    download_file,
+    get_buckets,
+    list_files,
+    main,
+    minio_file,
+    upload_file,
+)
 
-# from .minio_file import main  # Import the class
-
-__all__ = ["main"]
+__all__ = [
+    # Functional API
+    "MinioConnection",
+    "create_connection",
+    "upload_file",
+    "download_file",
+    "list_files",
+    "get_buckets",
+    # Legacy
+    "minio_file",
+    "main",
+]
