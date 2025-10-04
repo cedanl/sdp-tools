@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sdp-tools"
-version = "2025.1.7"
+version = "2025.1.8"
 description = "Tool to manage MinIO connections and transfers."
 authors = [
     {name = "Caspar Nijhuis", email = "caspar.nijhuis@gmail.com"}
@@ -149,7 +149,7 @@ exclude_lines = [
 ]
 
 [tool.bumpversion]
-current_version = "2025.1.7"
+current_version = "2025.1.8"
 commit = true
 commit_args = "--no-verify"
 tag = true
