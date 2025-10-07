@@ -364,6 +364,6 @@ For complete information on publishing to PyPI:
 
 ## Version
 
-Current version: 2025.1.6
+Current version: 2025.1.9
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.

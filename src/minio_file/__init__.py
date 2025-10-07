@@ -1,6 +1,6 @@
 """MinIO File management tool."""
 
-__version__ = "2025.1.8"
+__version__ = "2025.1.9"
 
 # Legacy class-based API (for backward compatibility)
 # Functional API (recommended)

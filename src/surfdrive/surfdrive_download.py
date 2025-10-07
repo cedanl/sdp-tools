@@ -24,11 +24,12 @@ def download_surfdrive_csv(filename):
         # Convert to DataFrame
         df = pd.read_csv(pd.io.common.StringIO(response.text))
         print(f"Downloaded successfully! Shape: {df.shape}")
+        df.to_csv(filename, index=False, sep=';')
+        print(f"Saved to {filename}")
         return df
     else:
-        print(f"Error: {response.status_code}")
         print(response.text)
-        return None
+        raise Exception(f"\nCan not download {filename}")
 
 
 def main():
