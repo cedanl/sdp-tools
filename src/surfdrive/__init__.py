@@ -1,6 +1,6 @@
 """SURFdrive file management tool."""
 
-__version__ = "2025.1.9"
+__version__ = "2025.1.10"
 
 # Import main functions for user access
 from .surfdrive_download import download_surfdrive_csv, main
