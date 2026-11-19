@@ -66,7 +66,7 @@ Repository = "https://github.com/cedanl/sdp-tools"
 Issues = "https://github.com/cedanl/sdp-tools/issues"
 
 [project.scripts]
-sdp-tools = "sdp_tools.sdp_tools:main"
+sdp-tools = "minio_file.minio_file:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/minio_file", "src/surfdrive"]
