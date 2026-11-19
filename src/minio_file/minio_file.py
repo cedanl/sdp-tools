@@ -250,12 +250,34 @@ class minio_file:
         download_file(self._conn, full_name, file_name)
 
 
-def main():
-    """Main function (for CLI)"""
+USAGE = """usage: sdp-tools [-h] [FILE TARGET]
+
+List the objects in the HO MinIO bucket, or download FILE when two arguments are given.
+Credentials are read from the MINIO_HO_* environment variables.
+
+options:
+  -h, --help  show this help message and exit"""
+
+
+def main(args: Optional[List[str]] = None) -> int:
+    """Main function (for CLI).
+
+    Args:
+        args: Command line arguments without the program name (defaults to sys.argv[1:])
+
+    Returns:
+        Exit code (0 on success)
+    """
+    if args is None:
+        args = argv[1:]
+    if "-h" in args or "--help" in args:
+        print(USAGE)
+        return 0
+
     ho = minio_file("HO")
     # Handle commanod line arguments
-    if len(argv) == 3:
-        ho_file = argv[1]
+    if len(args) == 2:
+        ho_file = args[0]
         ho_obj = Path(ho_file)
         # ml_file = argv[2]
         # ml_obj = Path(ml_file)
@@ -268,7 +290,8 @@ def main():
         # List uploaded objects
         print("\nListing objects in bucket:")
         ho.get_file_list()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
