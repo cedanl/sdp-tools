@@ -11,46 +11,43 @@ import pytest
 uv_available = shutil.which("uv") is not None
 
 
+PROJECT_ROOT = Path(__file__).parent.parent
+
+
+@pytest.fixture(scope="module")
+def built_dist(tmp_path_factory):
+    """Build the package once into a temporary directory and return that directory.
+
+    Building outside the repository keeps the project's own ``dist/`` untouched, so later
+    publishing steps never pick up artifacts left behind by the test suite.
+    """
+    if not uv_available:
+        pytest.skip("uv not available")
+
+    out_dir = tmp_path_factory.mktemp("dist")
+    result = subprocess.run(
+        ["uv", "build", "--out-dir", str(out_dir)], cwd=PROJECT_ROOT, capture_output=True, text=True
+    )
+    assert result.returncode == 0, f"Build failed: {result.stderr}"
+    return out_dir
+
+
 class TestPackageBuilding:
     """Test package can be built correctly."""
 
-    @pytest.mark.skipif(not uv_available, reason="uv not available")
-    def test_package_can_be_built(self):
+    def test_package_can_be_built(self, built_dist):
         """Test package builds without errors."""
-        # Change to project root
-        project_root = Path(__file__).parent.parent
-        original_cwd = os.getcwd()
+        dist_files = list(built_dist.glob("*"))
+        assert len(dist_files) > 0, "No files in dist directory"
 
-        try:
-            os.chdir(project_root)
+        # Should have both wheel and tarball
+        wheel_files = list(built_dist.glob("*.whl"))
+        tar_files = list(built_dist.glob("*.tar.gz"))
 
-            # Clean previous builds
-            dist_dir = project_root / "dist"
-            if dist_dir.exists():
-                shutil.rmtree(dist_dir)
+        assert len(wheel_files) > 0, "No wheel file created"
+        assert len(tar_files) > 0, "No source tarball created"
 
-            # Build package
-            result = subprocess.run(['uv', 'build'], capture_output=True, text=True)
-
-            assert result.returncode == 0, f"Build failed: {result.stderr}"
-
-            # Check build outputs exist
-            assert dist_dir.exists(), "dist directory not created"
-
-            dist_files = list(dist_dir.glob("*"))
-            assert len(dist_files) > 0, "No files in dist directory"
-
-            # Should have both wheel and tarball
-            wheel_files = list(dist_dir.glob("*.whl"))
-            tar_files = list(dist_dir.glob("*.tar.gz"))
-
-            assert len(wheel_files) > 0, "No wheel file created"
-            assert len(tar_files) > 0, "No source tarball created"
-
-        finally:
-            os.chdir(original_cwd)
-
-    def test_built_package_structure(self):
+    def test_built_package_structure(self, built_dist):
         """Test built package has correct structure."""
         # Read expected version from pyproject.toml
         import sys
@@ -60,21 +57,14 @@ class TestPackageBuilding:
         else:
             import tomli as tomllib
 
-        project_root = Path(__file__).parent.parent
-        pyproject_path = project_root / "pyproject.toml"
+        pyproject_path = PROJECT_ROOT / "pyproject.toml"
 
         with open(pyproject_path, "rb") as f:
             pyproject = tomllib.load(f)
         expected_version = pyproject["project"]["version"]
 
-        dist_dir = project_root / "dist"
-
-        if not dist_dir.exists():
-            pytest.skip("No dist directory found - run build test first")
-
-        wheel_files = list(dist_dir.glob("*.whl"))
-        if not wheel_files:
-            pytest.skip("No wheel file found - run build test first")
+        wheel_files = list(built_dist.glob("*.whl"))
+        assert wheel_files, "No wheel file built"
 
         # We could unzip and check contents here if needed
         wheel_file = wheel_files[0]
@@ -86,19 +76,12 @@ class TestInstallationFromBuilds:
     """Test package can be installed from built artifacts."""
 
     @pytest.mark.slow
-    def test_install_from_wheel(self):
+    def test_install_from_wheel(self, built_dist):
         """Test package can be installed from wheel."""
         import tempfile
 
-        project_root = Path(__file__).parent.parent
-        dist_dir = project_root / "dist"
-
-        if not dist_dir.exists():
-            pytest.skip("No dist directory found")
-
-        wheel_files = list(dist_dir.glob("*.whl"))
-        if not wheel_files:
-            pytest.skip("No wheel file found")
+        wheel_files = list(built_dist.glob("*.whl"))
+        assert wheel_files, "No wheel file built"
 
         wheel_file = wheel_files[0]
 
@@ -129,19 +112,12 @@ class TestInstallationFromBuilds:
             assert "OK" in result.stdout
 
     @pytest.mark.slow
-    def test_install_from_source(self):
+    def test_install_from_source(self, built_dist):
         """Test package can be installed from source distribution."""
         import tempfile
 
-        project_root = Path(__file__).parent.parent
-        dist_dir = project_root / "dist"
-
-        if not dist_dir.exists():
-            pytest.skip("No dist directory found")
-
-        tar_files = list(dist_dir.glob("*.tar.gz"))
-        if not tar_files:
-            pytest.skip("No source tarball found")
+        tar_files = list(built_dist.glob("*.tar.gz"))
+        assert tar_files, "No source tarball built"
 
         tar_file = tar_files[0]
 
@@ -175,27 +151,23 @@ class TestInstallationFromBuilds:
 class TestPackageMetadataInBuilds:
     """Test package metadata is correct in built packages."""
 
-    def test_version_consistency(self):
+    def test_version_consistency(self, built_dist):
         """Test version is consistent across package and builds."""
         import minio_file
 
         package_version = minio_file.__version__
 
-        project_root = Path(__file__).parent.parent
-        dist_dir = project_root / "dist"
+        # Check wheel filename contains version
+        wheel_files = list(built_dist.glob("*.whl"))
+        assert wheel_files, "No wheel file built"
+        wheel_name = wheel_files[0].name
+        assert package_version in wheel_name, f"Version {package_version} not in wheel name {wheel_name}"
 
-        if dist_dir.exists():
-            # Check wheel filename contains version
-            wheel_files = list(dist_dir.glob("*.whl"))
-            if wheel_files:
-                wheel_name = wheel_files[0].name
-                assert package_version in wheel_name, f"Version {package_version} not in wheel name {wheel_name}"
-
-            # Check source tarball filename contains version
-            tar_files = list(dist_dir.glob("*.tar.gz"))
-            if tar_files:
-                tar_name = tar_files[0].name
-                assert package_version in tar_name, f"Version {package_version} not in tarball name {tar_name}"
+        # Check source tarball filename contains version
+        tar_files = list(built_dist.glob("*.tar.gz"))
+        assert tar_files, "No source tarball built"
+        tar_name = tar_files[0].name
+        assert package_version in tar_name, f"Version {package_version} not in tarball name {tar_name}"
 
 
 class TestDevelopmentInstallation:
