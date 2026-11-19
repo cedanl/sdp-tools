@@ -7,13 +7,13 @@ from requests.auth import HTTPBasicAuth
 
 SURFDRIVE_WEBDAV = "https://surfdrive.surf.nl/files/public.php/webdav"
 
-# Get credentials from environment variables
-share_token = getenv("SURFDRIVE_SHARE_TOKEN")
-password = getenv("SURFDRIVE_PASSWORD")
-
 
 def download_surfdrive_csv(filename):
     """Download CSV from SURFdrive public share and return as DataFrame"""
+
+    # Get credentials from environment variables
+    share_token = getenv("SURFDRIVE_SHARE_TOKEN")
+    password = getenv("SURFDRIVE_PASSWORD")
 
     # Setup authentication
     auth = HTTPBasicAuth(share_token, password)
