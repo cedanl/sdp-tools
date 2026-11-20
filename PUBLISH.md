@@ -108,7 +108,7 @@ Note: You cannot delete releases from PyPI, only yank them.
 - Check GitHub Actions logs for details
 
 **Need to test first?**
-- Use Test PyPI: Push to `main` (auto-publishes dev version)
+- Use Test PyPI just before a release: run the dry run manually (Actions tab → "Stage & preview workflow" → Run workflow); it publishes a `.devN` version
 - Install with: `pip install -i https://test.pypi.org/simple/ sdp-tools`
 
 ## Version Numbering
@@ -132,7 +132,7 @@ Examples:
 - [ ] CHANGELOG.md updated
 - [ ] Version bumped in all files
 - [ ] Documentation updated
-- [ ] Tested on Test PyPI (optional but recommended)
+- [ ] Tested on Test PyPI (optional but recommended): run "Stage & preview workflow" manually from the Actions tab, then `pip install -i https://test.pypi.org/simple/ sdp-tools`
 - [ ] README examples work
 - [ ] Breaking changes documented
 
