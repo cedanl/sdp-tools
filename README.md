@@ -96,12 +96,11 @@ from surfdrive import download_surfdrive_csv
 # Download CSV and get DataFrame
 df = download_surfdrive_csv("data.csv")
 
-if df is not None:
-    print(f"Downloaded {len(df)} rows")
-    print(df.head())
+print(f"Downloaded {len(df)} rows")
+print(df.head())
 
-    # Save locally if needed
-    df.to_csv("local_copy.csv", index=False)
+# Save locally if needed
+df.to_csv("local_copy.csv", index=False)
 ```
 
 Or use the CLI:
@@ -257,10 +256,13 @@ ml.download_file("local_data.csv", "datasets/data.csv")
 Download a CSV file from SURFdrive public share.
 
 **Parameters:**
-- `filename` (str): Name of the file to download (currently unused, downloads from configured share)
+- `filename` (str): Path the CSV is written to (using `;` as separator). The file itself is downloaded from the configured share.
 
 **Returns:**
-- `pandas.DataFrame` or `None`: DataFrame with CSV data, or None if download fails
+- `pandas.DataFrame`: DataFrame with the CSV data
+
+**Raises:**
+- `Exception`: if the download fails (any non-200 response)
 
 **Environment Variables Required:**
 - `SURFDRIVE_SHARE_TOKEN`
@@ -271,9 +273,8 @@ Download a CSV file from SURFdrive public share.
 from surfdrive import download_surfdrive_csv
 
 df = download_surfdrive_csv("data.csv")
-if df is not None:
-    print(f"Shape: {df.shape}")
-    print(df.describe())
+print(f"Shape: {df.shape}")
+print(df.describe())
 ```
 
 ## Troubleshooting
@@ -282,7 +283,7 @@ if df is not None:
 
 #### Invalid Account Error
 ```
-Incorrect account {account}
+ValueError: Invalid account 'XX'. Must be one of: WO, HO, ML, VIZ
 ```
 **Solution:** Use only valid account names: "WO", "HO", "ML", or "VIZ"
 
@@ -364,6 +365,6 @@ For complete information on publishing to PyPI:
 
 ## Version
 
-Current version: 2025.1.9
+Current version: 2025.1.10
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
