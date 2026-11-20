@@ -43,10 +43,6 @@ def main():
             # Show basic info
             print(df.head())
 
-            # Save to local file
-            df.to_csv(path, index=False)
-            print("Saved to {path}")
-
     else:
         # List uploaded objects
         print("\nFile name not provided ... skipping.")

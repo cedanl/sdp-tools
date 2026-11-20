@@ -128,10 +128,13 @@ Initialize the MinIO client using credentials from environment variables.
 Download a CSV file from SURFdrive public share and return as a pandas DataFrame.
 
 **Parameters:**
-- `filename` (str): Name of the file to download (currently unused in implementation, downloads from configured WebDAV endpoint)
+- `filename` (str): Path the CSV is written to (using `;` as separator). The file itself is downloaded from the configured WebDAV endpoint.
 
 **Returns:**
-- `pandas.DataFrame` or `None`: DataFrame containing the CSV data, or None if download fails
+- `pandas.DataFrame`: DataFrame containing the CSV data
+
+**Raises:**
+- `Exception`: if the response status is not 200 (e.g. 401, 404, 500)
 
 **Environment Variables Required:**
 - `SURFDRIVE_SHARE_TOKEN`: Public share token from SURFdrive
@@ -150,11 +153,8 @@ from surfdrive import download_surfdrive_csv
 # Download CSV file
 df = download_surfdrive_csv("data.csv")
 
-if df is not None:
-    print(f"Downloaded {len(df)} rows with {len(df.columns)} columns")
-    print(df.head())
-else:
-    print("Download failed")
+print(f"Downloaded {len(df)} rows with {len(df.columns)} columns")
+print(df.head())
 ```
 
 ### `main()`
@@ -220,9 +220,8 @@ class minio_file:
 
 ```python
 import pandas as pd
-from typing import Optional
 
-def download_surfdrive_csv(filename: str) -> Optional[pd.DataFrame]: ...
+def download_surfdrive_csv(filename: str) -> pd.DataFrame: ...
 def main() -> None: ...
 ```
 
@@ -238,8 +237,8 @@ The `minio_file` class raises exceptions in the following cases:
 # Invalid account name
 try:
     invalid = minio_file("INVALID")
-except Exception as e:
-    print(f"Error: {e}")  # "Incorrect account INVALID"
+except ValueError as e:
+    print(f"Error: {e}")  # "Invalid account 'INVALID'. Must be one of: WO, HO, ML, VIZ"
 
 # Missing environment variables
 # Will fail during initialization if credentials are not set
@@ -250,13 +249,14 @@ except Exception as e:
 
 ### SURFdrive Module
 
-The `download_surfdrive_csv` function handles errors gracefully:
+The `download_surfdrive_csv` function raises an exception when the download fails; it never returns `None`:
 
 ```python
-# Returns None on HTTP errors (401, 404, 500, etc.)
-df = download_surfdrive_csv("data.csv")
-if df is None:
-    print("Download failed - check logs for HTTP status code")
+# Raises Exception on HTTP errors (401, 404, 500, etc.)
+try:
+    df = download_surfdrive_csv("data.csv")
+except Exception as e:
+    print(f"Download failed: {e}")
 
 # Raises exceptions for network errors
 try:
@@ -290,32 +290,29 @@ os.environ['SURFDRIVE_PASSWORD'] = 'share-password'
 print("Downloading from SURFdrive...")
 df = download_surfdrive_csv("input_data.csv")
 
-if df is not None:
-    print(f"Downloaded {len(df)} rows")
+print(f"Downloaded {len(df)} rows")
 
-    # Process data
-    df['processed'] = df['value'] * 2
+# Process data
+df['processed'] = df['value'] * 2
 
-    # Save to temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
-        df.to_csv(tmp.name, index=False)
-        tmp_path = tmp.name
+# Save to temporary file
+with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
+    df.to_csv(tmp.name, index=False)
+    tmp_path = tmp.name
 
-    try:
-        # Upload to MinIO
-        print("Uploading to MinIO...")
-        ml = minio_file("ML")
-        ml.upload_file(tmp_path, "processed/output_data.csv")
+try:
+    # Upload to MinIO
+    print("Uploading to MinIO...")
+    ml = minio_file("ML")
+    ml.upload_file(tmp_path, "processed/output_data.csv")
 
-        # Verify upload
-        print("\nVerifying upload...")
-        ml.get_file_list()
+    # Verify upload
+    print("\nVerifying upload...")
+    ml.get_file_list()
 
-        print("\nSuccess!")
-    finally:
-        # Cleanup
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-else:
-    print("Download failed")
+    print("\nSuccess!")
+finally:
+    # Cleanup
+    if os.path.exists(tmp_path):
+        os.remove(tmp_path)
 ```
