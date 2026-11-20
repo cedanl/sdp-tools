@@ -2,33 +2,33 @@
 
 ## Stable release
 
-To install minio-file, run this command in your
+To install sdp-tools, run this command in your
 terminal:
 
 ``` console
-$ pip install minio-file
+$ pip install sdp-tools
 ```
 
-This is the preferred method to install minio-file, as it will always install the most recent stable release.
+This is the preferred method to install sdp-tools, as it will always install the most recent stable release.
 
 If you don't have [pip][] installed, this [Python installation guide][]
 can guide you through the process.
 
 ## From source
 
-The source for minio-file can be downloaded from
+The source for sdp-tools can be downloaded from
 the [Github repo][].
 
 You can either clone the public repository:
 
 ``` console
-$ git clone git://github.com/cedanl/minio-file
+$ git clone https://github.com/cedanl/sdp-tools
 ```
 
 Or download the [tarball][]:
 
 ``` console
-$ curl -OJL https://github.com/cedanl/minio-file/tarball/main
+$ curl -OJL https://github.com/cedanl/sdp-tools/tarball/main
 ```
 
 Once you have a copy of the source, you can install it with:
@@ -39,5 +39,5 @@ $ pip install .
 
   [pip]: https://pip.pypa.io
   [Python installation guide]: http://docs.python-guide.org/en/latest/starting/installation/
-  [Github repo]: https://github.com/%7B%7B%20cookiecutter.github_username%20%7D%7D/%7B%7B%20cookiecutter.project_slug%20%7D%7D
-  [tarball]: https://github.com/%7B%7B%20cookiecutter.github_username%20%7D%7D/%7B%7B%20cookiecutter.project_slug%20%7D%7D/tarball/main
+  [Github repo]: https://github.com/cedanl/sdp-tools
+  [tarball]: https://github.com/cedanl/sdp-tools/tarball/main
