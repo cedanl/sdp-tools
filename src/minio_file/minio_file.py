@@ -252,8 +252,13 @@ class minio_file:
 
 USAGE = """usage: sdp-tools [-h] [FILE TARGET]
 
-List the objects in the HO MinIO bucket, or download FILE when two arguments are given.
+List the objects in the HO MinIO bucket, or download FILE to TARGET when two arguments are given.
+An existing file at TARGET is not overwritten.
 Credentials are read from the MINIO_HO_* environment variables.
+
+positional arguments:
+  FILE        object name in the HO bucket
+  TARGET      local path to save it to
 
 options:
   -h, --help  show this help message and exit"""
@@ -277,15 +282,14 @@ def main(args: Optional[List[str]] = None) -> int:
     ho = minio_file("HO")
     # Handle commanod line arguments
     if len(args) == 2:
-        ho_file = args[0]
-        ho_obj = Path(ho_file)
-        # ml_file = argv[2]
-        # ml_obj = Path(ml_file)
+        ho_file, target = args
+        target_path = Path(target)
 
-        if ho_obj.is_file():
-            print(f"Skipping existing file: {ho_obj}")
+        if target_path.is_file():
+            print(f"Skipping existing file: {target_path}")
         else:
-            ho.download_file(ho_file, str(ho_obj))
+            # The method takes the local path first and the remote object second
+            ho.download_file(str(target_path), ho_file)
     else:
         # List uploaded objects
         print("\nListing objects in bucket:")
