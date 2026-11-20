@@ -74,3 +74,66 @@ class TestEntryPoint:
 
         assert module.main() == 0
         assert "usage: sdp-tools" in capsys.readouterr().out
+
+
+class TestDownload:
+    """Test the two-argument download form of sdp-tools."""
+
+    @pytest.fixture
+    def module(self, monkeypatch, tmp_path):
+        """Return the CLI module with dummy HO credentials and tmp_path as cwd."""
+        monkeypatch.setenv("MINIO_HO_ENDPOINT", "https://minio.invalid")
+        monkeypatch.setenv("MINIO_HO_ACCESS_KEY", "dummy-access")
+        monkeypatch.setenv("MINIO_HO_SECRET_KEY", "dummy-secret")
+        monkeypatch.setenv("MINIO_HO_BUCKET", "dummy-bucket")
+        monkeypatch.chdir(tmp_path)
+        return importlib.import_module("minio_file.minio_file")
+
+    @pytest.fixture
+    def fget(self, monkeypatch):
+        """Mock Minio.fget_object and record its calls."""
+        calls = []
+
+        def fake_fget_object(self, *args, **kwargs):
+            calls.append(kwargs)
+
+        monkeypatch.setattr("minio.Minio.fget_object", fake_fget_object)
+        return calls
+
+    def test_downloads_file_to_target(self, module, fget):
+        """FILE is the object name in the bucket, TARGET the local destination."""
+        assert module.main(["remote/data.csv", "local/copy.csv"]) == 0
+
+        assert len(fget) == 1
+        assert fget[0]["bucket_name"] == "dummy-bucket"
+        assert fget[0]["object_name"] == "remote/data.csv"
+        assert fget[0]["file_path"] == "local/copy.csv"
+
+    def test_skips_existing_target(self, module, fget, tmp_path, capsys):
+        """An existing TARGET is not overwritten and is named in the output."""
+        (tmp_path / "copy.csv").write_text("existing")
+
+        assert module.main(["remote/data.csv", "copy.csv"]) == 0
+
+        assert fget == []
+        assert "copy.csv" in capsys.readouterr().out
+        assert (tmp_path / "copy.csv").read_text() == "existing"
+
+    def test_local_file_named_like_object_does_not_block_download(self, module, fget, tmp_path):
+        """A local file named FILE no longer suppresses the download to TARGET."""
+        (tmp_path / "data.csv").write_text("unrelated")
+
+        assert module.main(["data.csv", "copy.csv"]) == 0
+
+        assert len(fget) == 1
+        assert fget[0]["object_name"] == "data.csv"
+        assert fget[0]["file_path"] == "copy.csv"
+
+    def test_help_describes_file_and_target(self, capsys):
+        """The usage text explains FILE and TARGET."""
+        module = importlib.import_module("minio_file.minio_file")
+
+        assert module.main(["-h"]) == 0
+        out = capsys.readouterr().out
+        assert "FILE        object name in the HO bucket" in out
+        assert "TARGET      local path to save it to" in out
