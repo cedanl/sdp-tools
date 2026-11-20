@@ -331,7 +331,7 @@ Connection timeout
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/cedanl/sdp-tools/blob/main/CONTRIBUTING.md) for guidelines.
 
 ### Development Workflow
 
@@ -346,7 +346,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](https://github.com/cedanl/sdp-tools/blob/main/LICENSE) file for details.
 
 ## Deployment
 
@@ -355,7 +355,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 For complete information on publishing to PyPI:
 - [Trusted Publisher Quick Start](docs/deployment/trusted-publisher-quickstart.md) - Already uploaded? Start here!
 - [Complete Test PyPI Setup Guide](docs/deployment/testpypi-setup.md) - First time? Read this.
-- [Deployment Documentation](docs/deployment/) - Overview and troubleshooting
+- [Deployment Documentation](docs/deployment/README.md) - Overview and troubleshooting
 
 ## Support
 
@@ -367,4 +367,4 @@ For complete information on publishing to PyPI:
 
 Current version: 2025.1.10
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+See [CHANGELOG.md](https://github.com/cedanl/sdp-tools/blob/main/CHANGELOG.md) for version history.
