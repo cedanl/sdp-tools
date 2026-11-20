@@ -10,11 +10,7 @@ from pathlib import Path
 from sys import argv
 from typing import Any, Dict, List, Optional
 
-import urllib3
 from minio import Minio
-
-# Disable SSL warnings if using self-signed certificates
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class MinioConnection:

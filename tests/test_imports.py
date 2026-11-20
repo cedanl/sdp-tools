@@ -72,6 +72,44 @@ class TestImports:
         assert len(main_funcs) > 0, "Main module should have functions"
 
 
+_WARNING_FILTERS_SCRIPT = '''
+import warnings
+
+import minio  # noqa: F401
+import urllib3  # noqa: F401
+
+before = list(warnings.filters)
+
+import minio_file  # noqa: F401
+import minio_file.minio_file  # noqa: F401
+
+for action, message, category, module, lineno in warnings.filters:
+    if (action, message, category, module, lineno) in before:
+        continue
+    name = getattr(category, "__name__", repr(category))
+    if action == "ignore" or name == "InsecureRequestWarning":
+        print(action, name, module, sep="|")
+'''
+
+
+class TestWarningFilters:
+    """Importing the package must not change the process-wide warning filters (#14)."""
+
+    def test_import_adds_no_ignore_filters(self):
+        """Test importing minio_file adds no ignore filter (InsecureRequestWarning included)."""
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, '-c', _WARNING_FILTERS_SCRIPT],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == '', f"Import added warning filters: {result.stdout}"
+
+
 class TestPackageStructure:
     """Test package structure and installation."""
 
