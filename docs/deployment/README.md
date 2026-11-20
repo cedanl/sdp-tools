@@ -34,7 +34,7 @@ Complete guide for setting up automated publishing to Test PyPI using GitHub Act
 - **Test PyPI**: https://test.pypi.org/project/sdp-tools/
 - **Production PyPI**: https://pypi.org/project/sdp-tools/ (when released)
 - **GitHub Actions**: https://github.com/cedanl/sdp-tools/actions
-- **Setup Script**: [../../scripts/setup_testpypi.sh](../../scripts/setup_testpypi.sh)
+- **Setup Script**: [scripts/setup_testpypi.sh](https://github.com/cedanl/sdp-tools/blob/main/scripts/setup_testpypi.sh)
 
 ## Workflows
 

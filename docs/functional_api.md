@@ -383,7 +383,7 @@ def get_buckets(conn: MinioConnection) -> List[str]
 
 ## Examples
 
-See the [examples directory](../examples/) for complete working examples:
+See the [examples directory](https://github.com/cedanl/sdp-tools/tree/main/examples) for complete working examples:
 
 - `functional_api_example.py` - Basic usage of the functional API
 - More examples coming soon!

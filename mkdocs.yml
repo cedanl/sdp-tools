@@ -8,6 +8,12 @@ nav:
   - Installation: installation.md
   - Usage: usage.md
   - Modules: api.md
+  - Functional API: functional_api.md
+  - Deployment:
+      - Overview: deployment/README.md
+      - TestPyPI setup: deployment/testpypi-setup.md
+      - PyPI production setup: deployment/pypi-production-setup.md
+      - Trusted publisher quickstart: deployment/trusted-publisher-quickstart.md
   - Contributing: contributing.md
   - Changelog: changelog.md
 theme:
