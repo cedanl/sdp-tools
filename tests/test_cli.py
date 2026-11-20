@@ -107,7 +107,7 @@ class TestDownload:
         assert len(fget) == 1
         assert fget[0]["bucket_name"] == "dummy-bucket"
         assert fget[0]["object_name"] == "remote/data.csv"
-        assert fget[0]["file_path"] == "local/copy.csv"
+        assert fget[0]["file_path"] == str(Path("local/copy.csv"))
 
     def test_skips_existing_target(self, module, fget, tmp_path, capsys):
         """An existing TARGET is not overwritten and is named in the output."""
