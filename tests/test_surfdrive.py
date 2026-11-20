@@ -66,3 +66,31 @@ def test_non_200_raises(monkeypatch, tmp_path):
     with pytest.raises(Exception, match="Can not download"):
         sd.download_surfdrive_csv(out)
     assert not out.exists()
+
+
+def test_main_writes_csv_once_with_semicolon(monkeypatch, tmp_path, capsys):
+    """The CLI writes the same ';'-separated CSV as the API and prints the real path."""
+    monkeypatch.setenv("SURFDRIVE_SHARE_TOKEN", "t")
+    monkeypatch.setenv("SURFDRIVE_PASSWORD", "p")
+    calls = _mock_get(monkeypatch)
+    out = tmp_path / "out.csv"
+    monkeypatch.setattr(sd, "argv", ["surfdrive_download", str(out)])
+
+    writes = []
+    real_to_csv = pd.DataFrame.to_csv
+
+    def counting_to_csv(self, *args, **kwargs):
+        writes.append(args[0] if args else kwargs.get("path_or_buf"))
+        return real_to_csv(self, *args, **kwargs)
+
+    monkeypatch.setattr(pd.DataFrame, "to_csv", counting_to_csv)
+
+    sd.main()
+
+    assert len(calls) == 1
+    assert writes == [str(out)]
+    assert out.read_text() == "a;b\n1;2\n"
+    output = capsys.readouterr().out
+    assert "{path}" not in output
+    saved = [line for line in output.splitlines() if line.startswith("Saved to")]
+    assert saved == [f"Saved to {out}"]
