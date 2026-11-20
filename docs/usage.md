@@ -119,12 +119,9 @@ from surfdrive import download_surfdrive_csv
 # Download CSV file
 df = download_surfdrive_csv("data.csv")
 
-if df is not None:
-    print(f"Successfully downloaded {len(df)} rows")
-    print(f"Columns: {df.columns.tolist()}")
-    print(df.head())
-else:
-    print("Download failed")
+print(f"Successfully downloaded {len(df)} rows")
+print(f"Columns: {df.columns.tolist()}")
+print(df.head())
 ```
 
 ### Working with Downloaded Data
@@ -136,18 +133,17 @@ import pandas as pd
 # Download and process
 df = download_surfdrive_csv("sales_data.csv")
 
-if df is not None:
-    # Basic statistics
-    print(df.describe())
+# Basic statistics
+print(df.describe())
 
-    # Filter data
-    recent = df[df['date'] > '2024-01-01']
+# Filter data
+recent = df[df['date'] > '2024-01-01']
 
-    # Save locally
-    df.to_csv("local_copy.csv", index=False)
+# Save locally
+df.to_csv("local_copy.csv", index=False)
 
-    # Save as parquet for better performance
-    df.to_parquet("local_copy.parquet", index=False)
+# Save as parquet for better performance
+df.to_parquet("local_copy.parquet", index=False)
 ```
 
 ### CLI Usage
@@ -165,15 +161,11 @@ import sys
 
 try:
     df = download_surfdrive_csv("data.csv")
-
-    if df is None:
-        print("Download failed - check credentials and share URL")
-        sys.exit(1)
-
     print(f"Success! Downloaded {len(df)} rows")
 
 except Exception as e:
-    print(f"Unexpected error: {e}")
+    # A failed download (non-200 response) raises an exception
+    print(f"Download failed: {e}")
     sys.exit(1)
 ```
 
@@ -190,22 +182,19 @@ import tempfile
 print("Downloading from SURFdrive...")
 df = download_surfdrive_csv("input_data.csv")
 
-if df is not None:
-    print(f"Downloaded {len(df)} rows")
+print(f"Downloaded {len(df)} rows")
 
-    # Save to temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
-        df.to_csv(tmp.name, index=False)
-        tmp_path = tmp.name
+# Save to temporary file
+with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
+    df.to_csv(tmp.name, index=False)
+    tmp_path = tmp.name
 
-    # Upload to MinIO
-    print("Uploading to MinIO...")
-    ml = minio_file("ML")
-    ml.upload_file(tmp_path, "datasets/surfdrive_data.csv")
+# Upload to MinIO
+print("Uploading to MinIO...")
+ml = minio_file("ML")
+ml.upload_file(tmp_path, "datasets/surfdrive_data.csv")
 
-    print("Transfer complete!")
-else:
-    print("Download failed")
+print("Transfer complete!")
 ```
 
 ## Advanced Usage
